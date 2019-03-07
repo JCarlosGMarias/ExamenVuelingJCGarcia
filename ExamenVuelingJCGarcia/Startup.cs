@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using IbmServices.Configs;
+﻿using IbmServices.Configs;
+using IbmServices.Models;
+using IbmServices.Repositories;
+using IbmServices.Services.Rates;
+using IbmServices.Services.ResourceClients;
+using IbmServices.Services.Transactions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace ExamenVuelingJCGarcia
 {
@@ -31,6 +30,23 @@ namespace ExamenVuelingJCGarcia
 
             // Logging injection
             services.AddSingleton(NLog.LogManager.LoadConfiguration("NLog.config"));
+
+            // DBContext inyection
+            services.AddDbContext<IbmContext>(opts => opts.UseInMemoryDatabase("IbmDB"));
+
+            // Repositories' injection
+            services.AddScoped<IRepository<Rate>, RatesRepository>();
+            services.AddScoped<IRepository<Transaction>, TransactionsRepository>();
+
+            // Services' injection
+            services.AddScoped<IRateService, RateService>();
+            services.AddScoped<ITransactionService, TransactionService>();
+            services.AddScoped<IResourceClient<Rate>, RateClient>();
+            services.AddScoped<IResourceClient<Transaction>, TransactionClient>();
+
+            // Model's injection
+            services.AddScoped<BaseEntity, Rate>();
+            services.AddScoped<BaseEntity, Transaction>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
